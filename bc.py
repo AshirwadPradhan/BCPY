@@ -75,6 +75,23 @@ class Blockchain(object):
 		# returns the last block in the chain
 		return self.chain[-1]
 	
+	@staticmethod
+	def valid_proof(last_proof, proof):
+		"""
+		Computes h(last_proof, proof) contains 4 leading zeros
+
+		:param last_proof: <int> last proof
+		:param proof: <int> new proof to check
+		:return: <bool> returns wether this proof is valid or not
+		"""
+
+		guess = '{last_proof}{proof}'.format(last_proof=last_proof, proof=proof).encode()
+		guess_hash = hashlib.sha256(guess).hexdigest()
+
+		# the number of zeros gives us the difficulty of the algorithm
+		# we can manipulate the number of zeros to increase or decrease the difficulty
+		return guess_hash[:4] == '0000'
+	
 	def proof_of_work(self, last_proof):
 		"""
 		PoW algorithm for the blockchain
@@ -89,19 +106,3 @@ class Blockchain(object):
 			proof += 1
 
 		return proof
-
-	def vaild_proof(self,last_proof, proof):
-		"""
-		Computes h(last_proof, proof) contains 4 leading zeros
-
-		:param last_proof: <int> last proof
-		:param proof: <int> new proof to check
-		:return: <bool> returns wether this proof is valid or not
-		"""
-
-		guess = str(str(last_proof)+str(proof)).encode()
-		guess_hash = hashlib.sha256(guess).hexdigest()
-
-		# the number of zeros gives us the difficulty of the algorithm
-		# we can manipulate the number of zeros to increase or decrease the difficulty
-		return guess_hash[:4] == '0000'
