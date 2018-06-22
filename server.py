@@ -54,7 +54,7 @@ def new_transaction():
 	# value['sender'] = request.args.get('sender')
 	# value['recipient'] = request.args.get('recipient')
 	# value['amount'] = request.args.get('amount')
-	print(value)
+	# print(value)
 
 	# check for valid data from POST
 	if not len(value) == 0:

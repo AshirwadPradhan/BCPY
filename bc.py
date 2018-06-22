@@ -2,14 +2,29 @@ import hashlib
 import json
 from time import time
 from uuid import uuid4
+from urllib.parse import urlparse
 
 class Blockchain(object):
 	def __init__(self):
 		self.chain = []
 		self.current_transactions = []
+		# collection of nodes connected to the blockchain
+		self.nodes = set()
 
 		# creation of genesis block
 		self.new_block(proof=100, previous_hash=1)
+
+	def register_node(self, address):
+		'''
+		Register a new node in the blockchain
+		
+		:param address: <str> IP address of the node
+		:return: None
+		'''
+
+		node_address = urlparse(address)
+		self.nodes.add(node_address.netloc)
+
 
 	def new_block(self, proof, previous_hash=None):
 		"""
