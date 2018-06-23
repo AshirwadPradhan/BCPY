@@ -3,6 +3,7 @@ import json
 from time import time
 from uuid import uuid4
 from urllib.parse import urlparse
+import requests
 
 class Blockchain(object):
 	def __init__(self):
@@ -121,3 +122,73 @@ class Blockchain(object):
 			proof += 1
 
 		return proof
+	
+	def valid_chain(self, chain):
+		"""
+		Verifies if the blockchain is valid or not
+
+		:param chain: <list> blockchain to verify
+		:return: <bool> True if blockchain is valid and False if not
+		"""
+		last_block = chain[0]
+		current_index = 1
+
+		# check for each block and verify if hash and proof of work is correct
+		while current_index < len(chain):
+			current_block = chain[current_index]
+			print('{}'.format(last_block))
+			print('{}'.format(current_block))
+			print('\n'+'-'*20+'\n')
+
+			# check if the hash of the block is correct
+			if current_block['previous_hash'] != self.hash(last_block):
+				return False
+			
+			# check if the Proof of work is correct
+			if not self.valid_proof(last_block['proof'], current_block['proof']):
+				return False
+			
+			last_block = current_block
+			current_index += 1
+	
+		return True
+	
+	def maintain_consensus(self):
+		"""
+		This is consensus algorithm. 
+		It resolves the conflicts by replacing our chain with the longest chain in the network
+
+		:return: <bool> True if our chain is replaced. False if not
+		"""
+		neighbours = self.nodes
+		new_chain = None
+
+		# initialize maximum length as the length of the current node chain
+		max_len = len(self.chain)
+
+		# get the chain information from every node in the network
+		for node in neighbours:
+			# get the chain
+			response = requests.get('http://{}/chain'.format(node))
+
+			# check if the node is alive
+			if response.status_code == '200':
+				# get the chain length and the chain
+				response_length = response.json()['length']
+				response_chain = response.json()['chain']
+
+				# check if the chain from other node is valid and longer than this node chain
+				if response_length > max_len and self.valid_chain(response_chain):
+					max_len = response_length
+					new_chain = response_chain
+		
+		# if new chain has been found replace this chain with new found chain
+		if new_chain:
+			self.chain = new_chain
+			return True
+		
+		return False
+
+
+
+
