@@ -81,5 +81,43 @@ def full_chain():
 
     return jsonify(response), 200
 
+# API endpoint to register the blockchain nodes
+@app.route('/nodes/register', methods=['POST'])
+def register_nodes():
+    nodes_list = request.get_json()
+
+    nodes = nodes_list.get('nodes')
+    if nodes is None:
+        return "Error: Invalid nodes list", 400
+
+    for node in nodes:
+        blockchain.register_node(node)
+    
+    response = {
+        'message': 'New nodes has been added to blockchain',
+        'total_nodes': list(blockchain.nodes),
+    }
+
+    return jsonify(response), 201
+
+# API endpoint to determine consensus
+@app.route('/nodes/resolve', methods=['GET'])
+def consensus():
+    isconflict = blockchain.maintain_consensus()
+
+    if isconflict:
+        response = {
+            'message': 'Our chain was replaced by the valid chain',
+            'new_chain': blockchain.chain,
+        }
+    else:
+        response = {
+            'message': 'Our chain is valid',
+            'chain': blockchain.chain,
+        }
+    
+    return jsonify(response), 201
+
+
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

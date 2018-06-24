@@ -160,14 +160,14 @@ class Blockchain(object):
 
 		:return: <bool> True if our chain is replaced. False if not
 		"""
-		neighbours = self.nodes
+		peers = self.nodes
 		new_chain = None
 
 		# initialize maximum length as the length of the current node chain
 		max_len = len(self.chain)
 
 		# get the chain information from every node in the network
-		for node in neighbours:
+		for node in peers:
 			# get the chain
 			response = requests.get('http://{}/chain'.format(node))
 
